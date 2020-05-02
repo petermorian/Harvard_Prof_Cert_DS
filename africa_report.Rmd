@@ -24,7 +24,7 @@ opts_chunk$set(echo = TRUE)
 theme_set(theme_pubr()) #set theme for plots
 
 # add location of rdata file here! Either from github or by running the R file and using outputted Rdata file.
-load("/Users/Peter/Desktop/harvard prof cert/9 - Capstone/Individual/africa_script.Rdata") #load objects from rdata file
+load("~.Rdata") #load objects from rdata file
 ```
 
 # Introduction 
@@ -128,7 +128,7 @@ kable(all_proportions, "latex", booktabs = T, caption="Proportion of Crises", li
   collapse_rows(columns=1, latex_hline = "major", valign = "middle")
 ```
 
-Since the focus of model building is to predict a systemic crisis, we will now look into the correlations of different crises against *Syst*.  From the correlation matrix below, we can see that Banking crisies are highly correlated to Systemic crises. Similarly, Currency & Inflationary crisies are highly correlated with each other, just like Domesic Debt & Sovereign Debt crises.
+Since the focus of model building is to predict a systemic crisis, we will now look into the correlations of different crises against *Syst*.  From the correlation matrix below, we can see that Banking crisies are highly correlated to Systemic crises. Similarly, Currency & Inflationary crisies are highly correlated with each other, just like Domestic & Sovereign Debt crises.
 ``` {r correlations, fig.align="center", out.width = "50%", out.height = "50%", echo=FALSE}
 correlations_all_plot
 ```
@@ -143,14 +143,14 @@ To expand on this, we will now look into the annual changes in these exchange ra
 exch_change_OT
 ```
 
-With regards to Inflation, the charts below show the movement in each country's inflation CPI rate over time. Overall, it is clear to see moments of Hyper-inflation and Hyper-deflation across all economies. Also, it appeas that the 1990's were a common period of high inflation across many countries, whilst other counties had inflation spikes post-WWII (late 1940's and 50's). 
+With regards to Inflation, the charts below show the movement in each country's inflation CPI rate over time. Overall, it is clear to see moments of Hyper-inflation and Hyper-deflation across all economies. Also, it appears that the 1990's were a common period of high inflation across many countries, whilst other countries had inflation spikes post-WWII (late 1940's and 50's). 
 
 Unlike the previous exchange rates plots, Tunisia and the Ivory Coast have clear information when looking at their respective charts. However, countries with extreme Hyper-inflation like Zimbabwe and Angola are harder to decipher. 
 ```{r inflation 1, fig.align="center", fig.height=10, fig.width=10, out.width = "80%", out.height = "80%", echo=FALSE}
 infl_OT
 ```
 
-Similarly, we will now look into annual changes in the inflation rates of each African country. In the first run of these charts, extreme values tend to skew thew the visuals. Thus, the below chart exclude annual inflationary movements of +-200% or larger, in order to provide a clearer understanding of the annual inflation changes.
+Similarly, we will now look into annual changes in the inflation rates of each African country. In the first run of these charts, extreme values tended to skew the visuals. Thus, the below chart exclude absolute annual inflationary movements of 200% or larger, in order to provide a clearer understanding of the magnitude of CPI movements.
 ```{r inflation 2, fig.align="center", fig.height=10, fig.width=10, out.width = "80%", out.height = "80%", echo=FALSE}
 infl_change_OT
 ```
@@ -158,16 +158,16 @@ infl_change_OT
 ## Model Building
 Noting the analysis that we done in previous sections of this report, in this section we will now look into bulding a few machine learning models to predict Systemic Crises in African Economies. To produce the training & testing data, the cleaned Afrian Crisies dataset was split 80/20.  There are `r nrow_africa_train` rows in the training data and `r nrow_africa_test` rows in the testing data. Models were build using the training set, and then compared to the test set via the Accuracy measure from the Confusion Matrix, in order to determine if additional parameters are need before a final model can be selected. 
 
-In deteriming the success of a machine learning model, the Confusion Matrix is a summary tool that tabulates the each combination of prediction and actuals. It shows the number of true & false positive outcomes, and the number of true & false negative outcomes. The ability of a model to correctly predict true outcomes is called the Sensitivity of a model (number of true positives over the sum of true positives and false negatives), whilst the ability of model to correctly not predict false ouctomes is called the Specificity (number of true negatives over the sum of true negatives and false positives).
+In deteriming the success of a machine learning model, the Confusion Matrix is a summary tool that tabulates the each combination of predictions and actuals. It shows the number of true & false positive outcomes, and the number of true & false negative outcomes. The ability of a model to correctly predict true outcomes is called the Sensitivity of a model (number of true positives over the sum of true positives and false negatives), whilst the ability of model to correctly not predict false ouctomes is called the Specificity (number of true negatives over the sum of true negatives and false positives).
 
 The Accuracy measure combines Sensitivity and Specificity into a single metric for assessing a model's predictive ability. It is calcuated as the sum of true positives & true negatives, over the sum of all positives and negatives. The higher the Accuary score, the better the model is at predicting outcomes.
 
 ### GLM
-The first Machine learning method that trialed was the Generalised Linear Model (GLM). The initial model that was run is using *Country* as the only predictor which shown in the formula, where $c,y$ refers to each Country & Year pairing. Whislt is it not expected to use the Country's name as a predictor for a systemic crisis, this model was run as a baseline model.
+The first Machine learning method that was trialed was the Generalised Linear Model (GLM). The initial model that was run is using *Country* as the only predictor which is shown in the formula, where $c,y$ refers to each Country & Year pairing. Whislt is it not expected to use the Country's name as a predictor for a systemic crisis, this model was run as a baseline model.
 $$Model_1: \hat{Syst}_{c,y} = \alpha+\beta_cCountry_{c}$$
 The second GLM model was run using Banking Crisis (*Bank*) and Annual Echange rate changes (*EX_change*) as predictors. These variables were selected after inspecting the correlation matrix and selecting parameters that are highly correlated to *Syst*.
 $$Model_2: \hat{Syst}_{c,y} = \alpha+\beta_1Bank_{c,y}+\beta_2\Delta EX_{c,y}$$
-The thirs and final GLM model was run using Banking Crisis (*Bank*) and Currency Crisis (*Curr*) as predictors. Similary, these variables are selected as they were  highly correlated to *Syst*. However, *Curr* has slighly higher correlation than *CPI_change*.
+The third and final GLM model was run using Banking Crisis (*Bank*) and Currency Crisis (*Curr*) as predictors. Similary, these variables are selected as they were highly correlated to *Syst*. However, *Curr* has slighly higher correlation than *EX_change*.
 $$Model_3: \hat{Syst}_{c,y} = \alpha+\beta_1Bank_{c,y}+\beta_2Curr_{c,y}$$
 The accuracies of these three GLM models were compared against the test dataset, with Model 3 having the highest accuracy overall.
 ``` {r glm accuracy, echo=FALSE}
@@ -179,7 +179,7 @@ kable(GLM_Summary , "latex", booktabs = T, caption="GLM Accuracy", linesep = "")
 
 The Decision Tree is a machine learning technique that is classifies predictions based on the most common outcomes. It is ideal for when the outcome is categorical, and since *Syst* can only be classified as "0" or "1", this technique is suitable. It can be thought of as a series of "gates" that observations must go through, before being clustered into final prediction buckets, where each "gate" is a filter based on a parameter of the tree.
 
-Once component of Decision Tree modelling that must be taking into account is the Complexity Parameter (cp) - the threshold for the number of nodes that can exist in a tree. The more nodes that are in a tree, the better the model is at fitting the data, but more nodes can lead to over-training. Thus, a suitable Complexity Parameter must be selected that can make the Decision Tree accurately predict outcomes, but not overfit the data. In the case of this report, the below chart shows different complexity parameters against their produced accuracy against the test data, with cp = 0.034 resulting in the highest accuracy. This Complexity Parameter was used to build the Decision Tree.
+Once component of Decision Tree modelling that must be taking into account is the Complexity Parameter (cp) - the threshold for the number of nodes that can exist in a tree. The more nodes that are in a tree, the better the model is at fitting the data, but too many nodes can lead to over-training. Thus, a suitable Complexity Parameter must be selected that can make the Decision Tree accurately predict outcomes, but not overfit the data. In the case of this report, the below chart shows different complexity parameters against their produced accuracy against the test dataset, with cp = 0.034 resulting in the highest accuracy. This Complexity Parameter value was used to build the Decision Tree.
 ``` {r dt complexity parameter, fig.align="center", out.width = "50%", out.height = "50%", echo=FALSE}
 compelxity_parameter
 ```
@@ -191,7 +191,7 @@ decision_tree_plot
 
 ### Random Forest
 
-In simple terms, a Random Forest is a machine learning technique where many Decision Trees are created, with each tree being different to one another due to random bootstrapping of the training set, and the average outcome of all trees is selected as the final model. It can be viewed as taking the average of a "forest" of trees, where each tree has a unique combination of parameters and nodes. This machine learning technique is more stable than a single Decision Tree since the average of many outcomes is chosen, instead of relying on one parameter set.
+In simple terms, a Random Forest is a machine learning technique where many Decision Trees are created, with each tree being different to one another due to random bootstrapping of the training set, and the average outcome of all trees is selected as the final model. It can be viewed as taking the average of a "forest" of trees, where each tree has a unique combination of parameters and nodes. This machine learning technique is more stable than a single Decision Tree since the average of a large sample of outcomes is chosen, instead of relying on one parameter set.
 
 In our model, `r number_of_trees` trees were created in the Random Forest. From the chart below, we can see that model with 6 randomly selected predictors resulted in the highest accuracy in our Random Forest. This is selected as the final model and the outcomes are discussed in the Results section of this report.
 ``` {r rf random predictors, fig.align="center", out.width = "50%", out.height = "50%", echo=FALSE}
@@ -220,12 +220,10 @@ kable(Accuracy_Summary , "latex", booktabs = T, caption="Accuracy of all models"
 ##Summary of Findings
 Accross all models, a Banking Crisis is by far the strongest indicator of a Systemic Crisis in an African Country. It is also important to note that other economic indicators such as the exchange rate to the US Dollar, inflation rate and amount of soverign debt, are also useful predictors of Systemic Crises.
 
-Based of the findings of the final Random Forest Model, it should be noted that African economies which are independent, are not necessaraly more protected against financial instability those which are not independent. Also, the amount of domestic debt is not as strong of an indicator of financial instability than soverign (foreign) debt.
+Based of the findings of the final Random Forest Model, it should be noted that African economies which are independent, are not necessarily more protected against financial instability than those which are not independent. Also, the amount of domestic debt is not as strong of an indicator of financial instability than soverign (foreign) debt.
 
 ## Suggested Improvements
-As the focus of this report is only on the African contient, the most notiable suggestion for future improvements would be to gather a larger dataset with information from other counties outside of Africa, as this will allow us to idenfity if the discussed economic indicators of crisies are only unique to African economies. However, since the focus of this report was to only focus on the African economy, expanding the datset was beyond the initial objective. With that being said, it is believed that the general findings of this reports can still be applied to all economies.
-
-An additional future suggestion would be to apply other types of machine learning technicques like logistic regression, LDA, K-nearest neighbour, etc.
+As the focus of this report is only on the African contient, the most notiable suggestion for future improvements would be to gather a larger dataset with information from other counties outside of Africa, as this will allow us to idenfity if the discussed economic indicators of crisies are only unique to African economies. However, since the focus of this report was to only focus on the African economy, expanding the datset was beyond the initial objective. With that being said, it is believed that the general findings of this reports can still be applied to all economies. An additional future suggestion would be to apply other types of machine learning technicques like logistic regression, LDA, K-nearest neighbour, etc.
 
 
 # Acknowledgements
